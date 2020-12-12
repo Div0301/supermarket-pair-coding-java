@@ -1,5 +1,7 @@
 package org.example.supermarket;
 
+import org.example.supermaket.configuration.Product;
+import org.example.supermaket.configuration.Rules;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -10,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CheckoutTests {
 
 
-    private static final List<String> RULES = new ArrayList<>();
+    private static final List<Rules> RULES = new ArrayList<>();
 
-    int price(String items) {
+    Double price(List<Product> items) {
         Checkout co = new Checkout(RULES);
-        for(int i = 0; i < items.length(); i++) {
-            String item = String.valueOf(items.charAt(i));
+        for(int i = 0; i < items.size(); i++) {
+            Product item = items.get(i);
             co.scan(item);
         }
         return co.total();
@@ -23,7 +25,8 @@ public class CheckoutTests {
 
     @Test
     void testTotals() {
-        assertEquals(0, price(""));
+    	List<Product> products = new ArrayList<>();
+        assertEquals(0, price(products.add(new Product(""))));
         assertEquals(50, price("A"));
         assertEquals(80, price("AB"));
         assertEquals(115, price("CDBA"));
