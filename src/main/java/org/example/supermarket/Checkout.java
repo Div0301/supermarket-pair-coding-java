@@ -16,22 +16,38 @@ public class Checkout {
 	HashMap<Product, Double> productTotal = new HashMap<>();
 
 	private List<Rules> rule;
+
 	public Checkout(List<Rules> rules) {
 		this.rule = rules;
-		
+
 	}
 
 	public Double total() {
 
 		Iterator<Entry<Product, Integer>> scanIterator = scannedItems.entrySet().iterator();
 		while (scanIterator.hasNext()) {
+			
+			double totalSpecialPrice = 0;
 			Entry<Product, Integer> prdMap = scanIterator.next();
-			rule.forEach(rule -> {
-				if (rule.getProduct_name().equals(prdMap.getKey().getName())) {
-					// int quantity = prdMap.getValue()/rule.getProduct_quantity();
-					productTotal.put(prdMap.getKey(), prdMap.getValue() * rule.getProduct_price());
+			int itemLeft = prdMap.getValue();
+			Iterator<Rules> itr = rule.iterator();
+			
+			while (itr.hasNext()) {
+				Rules nextRule = itr.next();
+				if (nextRule.getProduct_name().equals(prdMap.getKey().getName())) {
+
+					if (nextRule.isSpecialPrice()) {
+						if (prdMap.getValue() >= nextRule.getSpecialPrtQuantity()) {
+							int quantity = prdMap.getValue() / nextRule.getSpecialPrtQuantity();
+							totalSpecialPrice = quantity * nextRule.getSpecialPrtPrice();
+							itemLeft = prdMap.getValue() - quantity * nextRule.getSpecialPrtQuantity();
+						}
+					}
+					totalSpecialPrice = totalSpecialPrice + itemLeft*nextRule.getProduct_price();
+					productTotal.put(prdMap.getKey(), totalSpecialPrice);
+					break;
 				}
-			});
+			}
 		}
 
 		double total = 0;
@@ -44,7 +60,7 @@ public class Checkout {
 	}
 
 	public void scan(Product items) {
-		if (scannedItems.get(items) != null)
+		if (scannedItems.get(items) == null)
 			scannedItems.put(items, 1);
 		else {
 			int count = scannedItems.get(items);
